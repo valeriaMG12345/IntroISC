@@ -1,13 +1,657 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+    <title>The Legend of Zelda - El Reino de Hyrule</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <h1>Mi sitio web</h1>
-    <h2>Bienvenido a mi sitio</h2>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zelda: {
+                            gold: '#f3c649',
+                            goldLight: '#ffe699',
+                            goldDark: '#b8860b',
+                            green: '#00cc88',
+                            greenDark: '#0a4232',
+                            teal: '#00f0b5',
+                            bgDark: '#080d14',
+                            cardBg: '#0e1726',
+                            borderGold: 'rgba(243, 198, 73, 0.3)',
+                        }
+                    },
+                    fontFamily: {
+                        title: ['Cinzel Decorative', 'Cinzel', 'serif'],
+                        header: ['Cinzel', 'serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-gold': '0 0 25px rgba(243, 198, 73, 0.4)',
+                        'glow-green': '0 0 25px rgba(0, 204, 136, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS Personalizado para la temática Zelda */
+        body {
+            background-color: #080d14;
+            color: #d1d5db;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Gradientes y texto resplandeciente */
+        .text-glow-gold {
+            text-shadow: 0 0 12px rgba(243, 198, 73, 0.6), 0 0 25px rgba(243, 198, 73, 0.3);
+        }
+        .text-glow-green {
+            text-shadow: 0 0 12px rgba(0, 240, 181, 0.6), 0 0 25px rgba(0, 240, 181, 0.3);
+        }
+
+        /* Patrón de ornametos del reverso */
+        .bg-pattern {
+            background-image: radial-gradient(rgba(243, 198, 73, 0.08) 1px, transparent 0);
+            background-size: 32px 32px;
+        }
+
+        /* Marcos y Bordes estilo Rúnico Zonnan / Sheikah */
+        .zelda-border {
+            position: relative;
+            border: 1px solid rgba(243, 198, 73, 0.3);
+            background: rgba(14, 23, 38, 0.85);
+            backdrop-filter: blur(8px);
+        }
+        .zelda-border::before, .zelda-border::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 2px solid #f3c649;
+        }
+        .zelda-border::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+        .zelda-border::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+        /* Esquinas de adorno adicionales */
+        .corner-tl { top: -1px; right: -1px; border-left: 0; border-bottom: 0; border: 2px solid #f3c649; }
+        .corner-bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; border: 2px solid #f3c649; }
+
+        /* Animación de pulso dorado */
+        @keyframes triforcePulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(243, 198, 73, 0.8)); }
+            50% { filter: drop-shadow(0 0 20px rgba(243, 198, 73, 1)); }
+        }
+        .animate-triforce {
+            animation: triforcePulse 3s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a3a52;
+            border-radius: 4px;
+            border: 1px solid rgba(243, 198, 73, 0.3);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f3c649;
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen flex flex-col justify-between selection:bg-zelda-gold selection:text-black">
+
+    <!-- Canvas para efecto de Partículas Zonnan (Fondo vivo) -->
+    <canvas id="particles-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-zelda-bgDark/90 backdrop-blur-md border-b border-zelda-borderGold" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo Zelda / Trifuerza -->
+                <a href="#inicio" class="flex items-center gap-3 group">
+                    <svg class="w-9 h-9 fill-zelda-gold animate-triforce transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
+                        <!-- SVG Trifuerza -->
+                        <polygon points="12,2 4,16 20,16" />
+                        <polygon points="4,16 0,23 8,23" />
+                        <polygon points="20,16 16,23 24,23" />
+                    </svg>
+                    <span class="font-title text-xl text-zelda-gold tracking-widest font-bold group-hover:text-white transition-colors">
+                        HYRULE
+                    </span>
+                </a>
+
+                <!-- Enlaces Desktop -->
+                <div class="hidden md:flex items-center space-x-8 font-header tracking-wider text-sm">
+                    <a href="#inicio" class="text-gray-300 hover:text-zelda-gold transition-colors duration-200">INICIO</a>
+                    <a href="#historia" class="text-gray-300 hover:text-zelda-gold transition-colors duration-200">HISTORIA</a>
+                    <a href="#elementos" class="text-gray-300 hover:text-zelda-gold transition-colors duration-200">ELEMENTOS</a>
+                    <a href="#galeria" class="text-gray-300 hover:text-zelda-gold transition-colors duration-200">GALERÍA</a>
+                </div>
+
+                <!-- Botón de Audio / Experiencia -->
+                <div class="hidden md:flex items-center">
+                    <button id="bgm-toggle" class="zelda-border px-4 py-2 text-xs font-header text-zelda-gold hover:bg-zelda-gold hover:text-black transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
+                        <span id="audio-text">MÚSICA</span>
+                    </button>
+                </div>
+
+                <!-- Menú Móvil Botón -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-zelda-gold hover:text-white focus:outline-none p-2">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Desplegable Móvil -->
+        <div id="mobile-menu" class="hidden md:hidden bg-zelda-cardBg/95 border-b border-zelda-borderGold px-4 pt-2 pb-6 space-y-3 font-header text-center">
+            <a href="#inicio" class="block py-2 text-gray-300 hover:text-zelda-gold">INICIO</a>
+            <a href="#historia" class="block py-2 text-gray-300 hover:text-zelda-gold">HISTORIA</a>
+            <a href="#elementos" class="block py-2 text-gray-300 hover:text-zelda-gold">ELEMENTOS</a>
+            <a href="#galeria" class="block py-2 text-gray-300 hover:text-zelda-gold">GALERÍA</a>
+        </div>
+    </nav>
+
+    <!-- SECCIÓN HERO -->
+    <section id="inicio" class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Imagen de Fondo Hero con Superposición de Gradiente -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80" 
+                 alt="Hyrule Landscape" 
+                 class="w-full h-full object-cover object-center scale-105 filter brightness-50 contrast-125"
+                 onerror="this.src='https://placehold.co/1920x1080/080d14/f3c649?text=Reino+de+Hyrule'">
+            <div class="absolute inset-0 bg-gradient-to-t from-zelda-bgDark via-zelda-bgDark/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-zelda-bgDark/80 via-transparent to-zelda-bgDark/80"></div>
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 text-center mt-12">
+            <!-- Símbolo Sheikah/Especial -->
+            <div class="mb-6 inline-block">
+                <span class="text-zelda-teal tracking-widest text-xs font-header border border-zelda-teal/40 px-4 py-1 rounded-full uppercase bg-zelda-teal/10">
+                    <i class="fa-solid fa-sparkles mr-2"></i>La Leyenda Renace
+                </span>
+            </div>
+
+            <!-- Título Principal -->
+            <h1 class="font-title text-4xl sm:text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-zelda-goldLight via-zelda-gold to-zelda-goldDark text-glow-gold tracking-wider mb-6">
+                THE LEGEND OF ZELDA
+            </h1>
+
+            <p class="font-header text-lg sm:text-2xl text-gray-200 tracking-widest mb-8 font-light max-w-3xl mx-auto">
+                EXPLORA LOS CIELOS, LA TIERRA Y LAS PROFUNDIDADES DEL REINO DE HYRULE
+            </p>
+
+            <p class="font-body text-gray-400 max-w-2xl mx-auto mb-10 text-sm sm:text-base leading-relaxed">
+                Despierta, Héroe del Tiempo. Enfréntate a las tinieblas que amenazan el reino y forja tu propio camino utilizando el antiguo poder que yace en tus manos.
+            </p>
+
+            <!-- Botón CTA -->
+            <div class="flex flex-col sm:flex-row gap-5 justify-center items-center">
+                <a href="#historia" class="relative group px-8 py-4 font-header font-bold text-black bg-gradient-to-r from-zelda-gold via-zelda-goldLight to-zelda-gold rounded-sm shadow-glow-gold overflow-hidden transition-all duration-300 transform hover:-translate-y-1">
+                    <span class="relative z-10 flex items-center gap-3">
+                        EXPLORAR EL REINO
+                        <i class="fa-solid fa-compass text-sm transition-transform group-hover:rotate-45"></i>
+                    </span>
+                    <div class="absolute inset-0 bg-white/40 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </a>
+
+                <a href="#elementos" class="zelda-border px-8 py-4 font-header font-semibold text-zelda-teal hover:bg-zelda-teal/10 transition-all duration-300 flex items-center gap-3">
+                    VER ARTEFACTOS
+                    <i class="fa-solid fa-shield-halved"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator Down -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+            <a href="#historia" class="text-zelda-gold/60 hover:text-zelda-gold transition-colors">
+                <i class="fa-solid fa-chevron-down text-2xl"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- SECCIÓN HISTORIA / LORE -->
+    <section id="historia" class="relative py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10">
+        <div class="text-center mb-16">
+            <h2 class="font-header text-xs sm:text-sm text-zelda-gold tracking-widest uppercase mb-2">--- El Destino de Hyrule ---</h2>
+            <h3 class="font-title text-3xl sm:text-5xl text-white font-bold">UNA LEYENDA ANCESTRAL</h3>
+            <div class="w-24 h-1 bg-gradient-to-r from-transparent via-zelda-gold to-transparent mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Imagen de Historia con marco estilizado -->
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-zelda-gold to-zelda-teal opacity-30 rounded-lg blur group-hover:opacity-60 transition duration-500"></div>
+                <div class="zelda-border p-2 relative rounded-sm bg-zelda-cardBg">
+                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80" 
+                         alt="Templo ancestral" 
+                         class="w-full h-80 sm:h-96 object-cover filter brightness-90 contrast-110"
+                         onerror="this.src='https://placehold.co/800x600/0e1726/f3c649?text=Leyenda+Ancestral'">
+                </div>
+            </div>
+
+            <!-- Contenido de Texto -->
+            <div class="space-y-6">
+                <h4 class="font-header text-2xl text-zelda-gold font-bold border-b border-zelda-borderGold pb-3">
+                    La Maldición y la Esperanza
+                </h4>
+                <p class="text-gray-300 leading-relaxed font-body">
+                    Desde tiempos inmemoriales, la tierra de Hyrule ha sido el escenario de una batalla eterna entre la luz y las sombras. Cuando el Cataclismo amenazó con sumergir el reino en el caos absoluto, la sabiduría de la **Princesa Zelda** y el valor del **Héroe Elegido** se alzaron como el último baluarte.
+                </p>
+                <p class="text-gray-300 leading-relaxed font-body">
+                    Hoy, extrañas islas flotan en los cielos y los abismos se abren en las profundidades de la tierra. Los misteriosos artefactos Zonnan y una energía milenaria despiertan para ofrecer al héroe nuevas habilidades capaces de desafiar las leyes de la naturaleza.
+                </p>
+
+                <!-- Cita Épica -->
+                <div class="zelda-border p-4 bg-zelda-bgDark/80 border-l-4 border-l-zelda-gold my-4">
+                    <p class="font-header italic text-zelda-goldLight text-sm sm:text-base">
+                        "Link... Eres la luz que volverá a ilumina a Hyrule. Abre tus ojos y recupera lo que fue destruido."
+                    </p>
+                    <span class="block text-right text-xs text-gray-400 mt-2 font-header">— Princesa Zelda</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN CARACTERÍSTICAS / ELEMENTOS CLAVE -->
+    <section id="elementos" class="relative py-24 bg-zelda-bgDark/60 border-y border-zelda-borderGold/40 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-header text-xs sm:text-sm text-zelda-teal tracking-widest uppercase mb-2">--- Misticismo y Poder ---</h2>
+                <h3 class="font-title text-3xl sm:text-5xl text-white font-bold">ELEMENTOS SAGRADOS</h3>
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-zelda-teal to-transparent mx-auto mt-4"></div>
+            </div>
+
+            <!-- Grid de Tarjetas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- Card 1: Espada Maestra -->
+                <div class="zelda-border p-6 rounded-sm hover:-translate-y-2 transition-all duration-300 group hover:shadow-glow-gold">
+                    <div class="w-14 h-14 rounded-full bg-zelda-gold/10 border border-zelda-gold flex items-center justify-center mb-6 text-zelda-gold group-hover:scale-110 group-hover:bg-zelda-gold group-hover:text-black transition-all">
+                        <i class="fa-solid fa-khanda text-2xl"></i>
+                    </div>
+                    <h4 class="font-header text-xl text-white font-bold mb-3 group-hover:text-zelda-gold transition-colors">
+                        Espada Maestra
+                    </h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        La espada destructora del mal. Forjada por los Dioses y templada por el coraje del héroe elegido a través de los eras.
+                    </p>
+                </div>
+
+                <!-- Card 2: La Trifuerza -->
+                <div class="zelda-border p-6 rounded-sm hover:-translate-y-2 transition-all duration-300 group hover:shadow-glow-gold">
+                    <div class="w-14 h-14 rounded-full bg-zelda-gold/10 border border-zelda-gold flex items-center justify-center mb-6 text-zelda-gold group-hover:scale-110 group-hover:bg-zelda-gold group-hover:text-black transition-all">
+                        <i class="fa-solid fa-shapes text-2xl"></i>
+                    </div>
+                    <h4 class="font-header text-xl text-white font-bold mb-3 group-hover:text-zelda-gold transition-colors">
+                        La Trifuerza
+                    </h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        El relicario omnipotente dejado por las Diosas Creadoras: Poder, Sabiduría y Valor en perfecto equilibrio divino.
+                    </p>
+                </div>
+
+                <!-- Card 3: Artefactos Zonnan -->
+                <div class="zelda-border p-6 rounded-sm hover:-translate-y-2 transition-all duration-300 group hover:shadow-glow-green">
+                    <div class="w-14 h-14 rounded-full bg-zelda-teal/10 border border-zelda-teal flex items-center justify-center mb-6 text-zelda-teal group-hover:scale-110 group-hover:bg-zelda-teal group-hover:text-black transition-all">
+                        <i class="fa-solid fa-gear text-2xl"></i>
+                    </div>
+                    <h4 class="font-header text-xl text-white font-bold mb-3 group-hover:text-zelda-teal transition-colors">
+                        Tecnología Zonnan
+                    </h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Mecanismos ancestrales y energía mística que permiten manipular la gravedad, fusionar objetos y construir vehículos.
+                    </p>
+                </div>
+
+                <!-- Card 4: Exploración Abierta -->
+                <div class="zelda-border p-6 rounded-sm hover:-translate-y-2 transition-all duration-300 group hover:shadow-glow-green">
+                    <div class="w-14 h-14 rounded-full bg-zelda-teal/10 border border-zelda-teal flex items-center justify-center mb-6 text-zelda-teal group-hover:scale-110 group-hover:bg-zelda-teal group-hover:text-black transition-all">
+                        <i class="fa-solid fa-mountain-sun text-2xl"></i>
+                    </div>
+                    <h4 class="font-header text-xl text-white font-bold mb-3 group-hover:text-zelda-teal transition-colors">
+                        Reino Abierto
+                    </h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Desde cumbres nevadas e islas celestiales hasta cavernas profundas. Un vasto mundo donde cada horizonte es alcanzable.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN GALERÍA -->
+    <section id="galeria" class="relative py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10">
+        <div class="text-center mb-12">
+            <h2 class="font-header text-xs sm:text-sm text-zelda-gold tracking-widest uppercase mb-2">--- Postales de Hyrule ---</h2>
+            <h3 class="font-title text-3xl sm:text-5xl text-white font-bold">GALERÍA DE PAISAJES</h3>
+            <div class="w-24 h-1 bg-gradient-to-r from-transparent via-zelda-gold to-transparent mx-auto mt-4"></div>
+        </div>
+
+        <!-- Filtros de Galería -->
+        <div class="flex justify-center gap-4 mb-10 flex-wrap font-header text-xs sm:text-sm">
+            <button class="gallery-filter active px-4 py-2 border border-zelda-gold bg-zelda-gold text-black font-bold transition-all" data-filter="all">TODOS</button>
+            <button class="gallery-filter px-4 py-2 border border-zelda-borderGold text-gray-300 hover:border-zelda-gold transition-all" data-filter="cielos">CIELOS</button>
+            <button class="gallery-filter px-4 py-2 border border-zelda-borderGold text-gray-300 hover:border-zelda-gold transition-all" data-filter="superficie">SUPERFICIE</button>
+            <button class="gallery-filter px-4 py-2 border border-zelda-borderGold text-gray-300 hover:border-zelda-gold transition-all" data-filter="santuarios">SANTUARIOS</button>
+        </div>
+
+        <!-- Grid Imágenes Galería -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-grid">
+            
+            <!-- Item 1 -->
+            <div class="gallery-item cielos relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80" 
+                     alt="Islas en el Cielo" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-gold font-header text-xs tracking-wider">CIELOS DE HYRULE</span>
+                    <h5 class="text-white font-title text-lg font-bold">Archipiélago Celestial</h5>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="gallery-item superficie relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" 
+                     alt="Praderas de Hyrule" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-gold font-header text-xs tracking-wider">SUPERFICIE</span>
+                    <h5 class="text-white font-title text-lg font-bold">Colinas de Hyrule</h5>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="gallery-item santuarios relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80" 
+                     alt="Templo Rúnico" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-teal font-header text-xs tracking-wider">SANTUARIOS</span>
+                    <h5 class="text-white font-title text-lg font-bold">Luz de Bendición Ancestral</h5>
+                </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="gallery-item superficie relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80" 
+                     alt="Montaña de la Muerte" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-gold font-header text-xs tracking-wider">SUPERFICIE</span>
+                    <h5 class="text-white font-title text-lg font-bold">Pico Eldin</h5>
+                </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="gallery-item cielos relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80" 
+                     alt="Atardecer Celestial" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-gold font-header text-xs tracking-wider">CIELOS DE HYRULE</span>
+                    <h5 class="text-white font-title text-lg font-bold">Cielo del Atardecer</h5>
+                </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="gallery-item santuarios relative group overflow-hidden zelda-border rounded-sm h-64 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80" 
+                     alt="Portal Zonnan" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <span class="text-zelda-teal font-header text-xs tracking-wider">SANTUARIOS</span>
+                    <h5 class="text-white font-title text-lg font-bold">Estructura Zonnan</h5>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- MODAL LIGHTBOX PARA LA GALERÍA -->
+    <div id="image-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <button id="modal-close" class="absolute top-6 right-6 text-zelda-gold hover:text-white text-3xl focus:outline-none">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="max-w-4xl w-full zelda-border p-2 bg-zelda-cardBg">
+            <img id="modal-img" src="" alt="Vista ampliada" class="w-full max-h-[80vh] object-contain">
+            <p id="modal-caption" class="text-center font-header text-zelda-gold mt-4 text-lg"></p>
+        </div>
+    </div>
+
+    <!-- SECCIÓN FOOTER -->
+    <footer class="relative z-10 bg-zelda-bgDark border-t border-zelda-borderGold py-12 px-4 text-center">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center space-y-6">
+            <!-- Logo Trifuerza Footer -->
+            <svg class="w-8 h-8 fill-zelda-gold" viewBox="0 0 24 24">
+                <polygon points="12,2 4,16 20,16" />
+                <polygon points="4,16 0,23 8,23" />
+                <polygon points="20,16 16,23 24,23" />
+            </svg>
+
+            <h4 class="font-title text-xl text-zelda-gold tracking-widest">
+                THE LEGEND OF ZELDA
+            </h4>
+
+            <p class="text-gray-400 text-xs max-w-md leading-relaxed font-body">
+                Landing page conceptual inspirada en el universo de Nintendo. Creado para fans y exploradores de la saga de Hyrule.
+            </p>
+
+            <div class="flex space-x-6 text-zelda-gold text-xl">
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-discord"></i></a>
+            </div>
+
+            <div class="text-gray-600 text-xs border-t border-gray-800 pt-6 w-full max-w-md">
+                &copy; <span id="year"></span> Hyrule Realm. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LÓGICA E INTERACTIVIDAD -->
+    <script>
+        // Actualizar año copyright
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // 1. Lógica del Menú Móvil
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 2. Partículas Dinámicas en Canvas (Efecto Místico Zonnan / Trifuerza)
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = -Math.random() * 0.5 - 0.2; // Ascendente suave
+                // Alternar entre dorado Sheikah y verde Zonnan
+                this.color = Math.random() > 0.5 ? '#f3c649' : '#00f0b5';
+                this.opacity = Math.random() * 0.7 + 0.2;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Reiniciar al salir por arriba
+                if (this.y < 0) {
+                    this.y = canvas.height;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            const numberOfParticles = Math.floor((canvas.width * canvas.height) / 12000);
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        // 3. Filtros de Galería
+        const filterButtons = document.querySelectorAll('.gallery-filter');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Actualizar botón activo
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-zelda-gold', 'text-black', 'font-bold');
+                    btn.classList.add('text-gray-300');
+                });
+                button.classList.add('active', 'bg-zelda-gold', 'text-black', 'font-bold');
+                button.classList.remove('text-gray-300');
+
+                const filterValue = button.getAttribute('data-filter');
+
+                galleryItems.forEach(item => {
+                    if (filterValue === 'all' || item.classList.contains(filterValue)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 4. Modal Lightbox de Galería
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalCaption = document.getElementById('modal-caption');
+        const modalClose = document.getElementById('modal-close');
+
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const img = item.querySelector('img');
+                const title = item.querySelector('h5').textContent;
+                modalImg.src = img.src;
+                modalCaption.textContent = title;
+                modal.classList.remove('hidden');
+            });
+        });
+
+        modalClose.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // 5. Simulación de Audio Ambiental (Web Audio API Synthesizer)
+        let audioCtx = null;
+        let isPlaying = false;
+        let oscillator = null;
+        let gainNode = null;
+
+        const bgmToggle = document.getElementById('bgm-toggle');
+        const audioIcon = document.getElementById('audio-icon');
+        const audioText = document.getElementById('audio-text');
+
+        bgmToggle.addEventListener('click', () => {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (!isPlaying) {
+                // Generar un acorde místico ambiental de fondo suave
+                audioCtx.resume();
+                oscillator = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(220, audioCtx.currentTime); // La3
+
+                gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 2);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                isPlaying = true;
+
+                audioIcon.className = 'fa-solid fa-volume-high';
+                audioText.textContent = 'SONIDO ON';
+                bgmToggle.classList.add('border-zelda-gold', 'bg-zelda-gold/10');
+            } else {
+                if (gainNode) {
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    setTimeout(() => {
+                        oscillator.stop();
+                        isPlaying = false;
+                    }, 500);
+                }
+                audioIcon.className = 'fa-solid fa-volume-xmark';
+                audioText.textContent = 'MÚSICA';
+                bgmToggle.classList.remove('border-zelda-gold', 'bg-zelda-gold/10');
+            }
+        });
+    </script>
 </body>
 </html>
